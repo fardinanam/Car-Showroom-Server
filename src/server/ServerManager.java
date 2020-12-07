@@ -1,10 +1,13 @@
 package server;
 
+import fileHandleClasses.UsersList;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
 
 public class ServerManager extends Thread{
     private Socket socket;
@@ -67,12 +70,17 @@ public class ServerManager extends Thread{
         return response;
     }
 
-    // TODO: Handle login properly
     private String handleLogin(String username, String pass) {
-        if(username.equals("admin") && pass.equals("123")) {
-            return "LIN,login successful," + username;
-        } else {
-            return "LIN,Access Denied";
+        List<String> users = UsersList.getInstance().getUsers();
+
+        for(String user : users) {
+            if(user.equals(username + "," + pass)) {
+                return "LIN,login successful," + username;
+            }
         }
+       /* if("admin,123".equals(username + "," + pass)) {
+            return "LIN,login successful," + username;
+        }*/
+        return "LIN,Access Denied";
     }
 }
