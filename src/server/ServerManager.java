@@ -1,5 +1,6 @@
 package server;
 
+import fileHandleClasses.CarsList;
 import fileHandleClasses.UsersList;
 
 import java.io.BufferedReader;
@@ -19,27 +20,33 @@ public class ServerManager extends Thread{
         this.socket = socket;
         this.clientId = clientId;
         System.out.println("Client " + clientId + " connected");
-    }
-
-    @Override
-    public void run() {
         try {
             inputFromClient = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
             outputToClient = new PrintWriter(
                     socket.getOutputStream(), true);
+        } catch (IOException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+
+
+    }
+
+    @Override
+    public void run() {
+        try {
             // Starting message to client
             outputToClient.println("Server Connected");
+            sendCarsToClient();
             while (true) {
                 String clientRequest = inputFromClient.readLine();
                 System.out.println("Client " + clientId + " requests: " + clientRequest);
                 String responseToClient = handleClientRequest(clientRequest);
+                outputToClient.println(responseToClient);
+
                 if(responseToClient.equals("exit")) {
-                    outputToClient.println("exit");
                     System.out.println("Client " + clientId + " disconnected");
                     break;
-                } else {
-                    outputToClient.println(responseToClient);
                 }
             }
         } catch (IOException e) {
@@ -78,9 +85,18 @@ public class ServerManager extends Thread{
                 return "LIN,login successful," + username;
             }
         }
-       /* if("admin,123".equals(username + "," + pass)) {
-            return "LIN,login successful," + username;
+       /*
+        if("admin,123".equals(username + "," + pass)) {
+        return "LIN,login successful," + username;
         }*/
         return "LIN,Access Denied";
+    }
+
+    private void sendCarsToClient() {
+        List<String> cars = CarsList.getInstance().getCars();
+
+        for(String car : cars) {
+            outputToClient.println("car," + car);
+        }
     }
 }
