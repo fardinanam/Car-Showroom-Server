@@ -8,17 +8,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.List;
 
 public class ServerManager extends Thread{
-    private Socket socket;
-    private int clientId;
+    private final Socket socket;
+    private final int clientId;
     private BufferedReader inputFromClient;
     private PrintWriter outputToClient;
+    private final HashSet<ServerManager> clients;
 
-    public ServerManager(Socket socket, int clientId) {
+    public ServerManager(Socket socket, int clientId, HashSet<ServerManager> clients) {
         this.socket = socket;
         this.clientId = clientId;
+        this.clients = clients;
         System.out.println("Client " + clientId + " connected");
         try {
             inputFromClient = new BufferedReader(
@@ -28,8 +31,6 @@ public class ServerManager extends Thread{
         } catch (IOException e) {
             System.out.println("Exception: " + e.getMessage());
         }
-
-
     }
 
     @Override
@@ -46,6 +47,7 @@ public class ServerManager extends Thread{
 
                 if(responseToClient.equals("exit")) {
                     System.out.println("Client " + clientId + " disconnected");
+                    clients.remove(this);
                     break;
                 }
             }
