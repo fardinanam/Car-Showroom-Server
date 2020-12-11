@@ -75,8 +75,26 @@ public class ServerManager extends Thread{
             response = handleLogin(requestMessages[1], requestMessages[2]);
         } else if(clientRequest.equals("exit")) {
             response = "exit";
+        } else if (requestMessages[0].equals("ADD")) {
+            response = handleAddCar(clientRequest.substring(4));
         }
         return response;
+    }
+
+    private synchronized String handleAddCar(String requestMessage) {
+        String reg = requestMessage.split(",")[0];
+        if(!CarsList.getInstance().contains(reg)) {
+            CarsList.getInstance().addNewCarToFile(requestMessage);
+            // Sending new Car info to all clients
+            for(ServerManager client : clients) {
+                client.sendCarToClient(requestMessage);
+            }
+            return "Your car has been added";
+        } else {
+            return "Can not add your car. (A car with registration No. " + reg +
+                    " already exists)";
+        }
+
     }
 
     private String handleLogin(String username, String pass) {
@@ -94,11 +112,14 @@ public class ServerManager extends Thread{
         return "LIN,Access Denied";
     }
 
+    public void sendCarToClient(String car) {
+        outputToClient.println("car," + car);
+    }
     private void sendCarsToClient() {
         List<String> cars = CarsList.getInstance().getCars();
 
         for(String car : cars) {
-            outputToClient.println("car," + car);
+            sendCarToClient(car);
         }
     }
 }

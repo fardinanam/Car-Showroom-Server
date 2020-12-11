@@ -1,7 +1,6 @@
 package fileHandleClasses;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class CarsList {
                 if(line == null) {
                     break;
                 }
-                addCars(line);
+                addCar(line);
             }
             reader.close();
         } catch (Exception e) {
@@ -30,9 +29,32 @@ public class CarsList {
         }
     }
 
-    private void addCars(String car) {
+    public void addNewCarToFile(String car) {
+        try {
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter("database/cars.txt", true));
+            writer.append(car + "\n");
+            addCar(car);
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+
+    }
+
+    public void addCar(String car) {
         cars.add(car);
     }
+
+    public boolean contains(String reg) {
+        for(String car : cars) {
+            if(car.split(",")[0].equalsIgnoreCase(reg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public static CarsList getInstance() {
         if(instance == null) {
