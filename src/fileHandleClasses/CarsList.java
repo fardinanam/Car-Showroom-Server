@@ -2,6 +2,7 @@ package fileHandleClasses;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class CarsList {
@@ -9,10 +10,10 @@ public class CarsList {
     private List<String> cars;
     private CarsList() {
         cars = new ArrayList<>();
-        addCarsFromFile();
+        parseCarsFromFile();
     }
 
-    public void addCarsFromFile() {
+    public void parseCarsFromFile() {
         try {
             BufferedReader reader = new BufferedReader(
                     new FileReader("database/cars.txt"));
@@ -39,11 +40,40 @@ public class CarsList {
         } catch (IOException e) {
             System.out.println("Exception: " + e.getMessage());
         }
-
     }
 
     public void addCar(String car) {
         cars.add(car);
+    }
+
+    public void addCarsToFile() {
+
+    }
+    /**
+     * @param reg Registration Number of the car to delete
+     */
+    public void deleteCar(String reg) {
+        try {
+            // Open the file without append mode
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter("database/cars.txt"));
+
+            // Using Iterator to avoid ConcurrentModificationException
+            Iterator<String> carIterator = cars.iterator();
+            while(carIterator.hasNext()) {
+                String car = carIterator.next();
+                if(reg.equalsIgnoreCase(car.split(",")[0])) {
+                    carIterator.remove();
+                } else {
+                    // Write from the beginning of the file and then append
+                    writer.append(car + "\n");
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
+
     }
 
     public boolean contains(String reg) {

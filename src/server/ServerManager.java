@@ -77,8 +77,18 @@ public class ServerManager extends Thread{
             response = "exit";
         } else if (requestMessages[0].equals("ADD")) {
             response = handleAddCar(clientRequest.substring(4));
+        } else if(requestMessages[0].equals("DLT")) {
+            response = handleDeleteCar(requestMessages[1]);
         }
         return response;
+    }
+
+    private synchronized String handleDeleteCar(String requestMessage) {
+        CarsList.getInstance().deleteCar(requestMessage);
+        for(ServerManager client : clients) {
+            client.sendDeleteCarResponse(requestMessage);
+        }
+        return "Car with Reg No. " + requestMessage + " has been deleted";
     }
 
     private synchronized String handleAddCar(String requestMessage) {
@@ -110,6 +120,10 @@ public class ServerManager extends Thread{
         return "LIN,login successful," + username;
         }*/
         return "LIN,Access Denied";
+    }
+
+    public void sendDeleteCarResponse(String reg) {
+        outputToClient.println("DLT," + reg);
     }
 
     public void sendCarToClient(String car) {
