@@ -13,6 +13,11 @@ public class CarsList {
         parseCarsFromFile();
     }
 
+    /**
+     * Parses comma separated car information from the file and adds it
+     * to the list.
+     * Format - reg,year,color1,color2,color3,make,model,price,quantity
+     */
     public void parseCarsFromFile() {
         try {
             BufferedReader reader = new BufferedReader(
@@ -76,6 +81,9 @@ public class CarsList {
 
     }
 
+    /**
+     * Checks if a car with registration number equals reg present in the list or not
+     */
     public boolean contains(String reg) {
         for(String car : cars) {
             if(car.split(",")[0].equalsIgnoreCase(reg)) {

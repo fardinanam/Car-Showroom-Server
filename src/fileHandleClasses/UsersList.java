@@ -13,6 +13,11 @@ public class UsersList {
         addUsersFromFile();
     }
 
+    /**
+     * Parses comma separated user information from the file and adds it
+     * to the list.
+     * Format - username,password
+     */
     public void addUsersFromFile() {
         try {
             BufferedReader reader = new BufferedReader(
@@ -30,7 +35,7 @@ public class UsersList {
         }
     }
 
-    public void addUser(String user) {
+    private void addUser(String user) {
         users.add(user);
     }
 

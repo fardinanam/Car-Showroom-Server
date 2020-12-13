@@ -65,6 +65,10 @@ public class ServerManager extends Thread{
 
     /**
      * @param clientRequest Comma separated request. First argument denotes the type of request
+     * Format - For login request: "LIN(login),Username,Pass"
+     *          For Add request: "ADD,(Comma separated car information)"
+     *          For Delete request: "DLT,Registration number of the car"
+     *          For Buy request: "BUY,(Comma separated car information)"
      */
     private String handleClientRequest(String clientRequest) {
         String[] requestMessages = new String[3];
@@ -86,6 +90,12 @@ public class ServerManager extends Thread{
         return response;
     }
 
+    /**
+     * Checks if the car is available in stock. If available, deletes older data
+     * and adds a new car with same information as old data except the quantity.
+     * Quantity is reduces by 1
+     * @return "Out of stock" or successful buy message
+     */
     private String handleBuyCar(String carInfo) {
         Car car = new Car(carInfo);
 
@@ -104,6 +114,9 @@ public class ServerManager extends Thread{
         return car.getReg() + " is out of stock";
     }
 
+    /**
+     * @param reg Registration number of the car that will be deleted
+     */
     private String handleDeleteCar(String reg) {
         CarsList.getInstance().deleteCar(reg);
         for(ServerManager client : clients) {
@@ -112,6 +125,10 @@ public class ServerManager extends Thread{
         return "Car with Reg No. " + reg + " has been deleted";
     }
 
+    /**
+     * @param carInfo Comma separated information of a car,
+     * similar to the format in the cars.txt file
+     */
     private String handleAddCar(String carInfo) {
         String reg = carInfo.split(",")[0];
         if(!CarsList.getInstance().contains(reg)) {
@@ -128,6 +145,10 @@ public class ServerManager extends Thread{
 
     }
 
+    /**
+     * @return Response message.
+     * Format - LIN (login),(success or denial message)
+     */
     private String handleLogin(String username, String pass) {
         List<String> users = UsersList.getInstance().getUsers();
 
@@ -136,20 +157,26 @@ public class ServerManager extends Thread{
                 return "LIN,login successful," + username;
             }
         }
-       /*
-        if("admin,123".equals(username + "," + pass)) {
-        return "LIN,login successful," + username;
-        }*/
         return "LIN,Access Denied";
     }
 
+    /**
+     * Sends delete response to the client
+     */
     public void sendDeleteCarResponse(String reg) {
         outputToClient.println("DLT," + reg);
     }
 
+    /**
+     * Sends all information of a car to client
+     */
     public void sendCarToClient(String car) {
         outputToClient.println("car," + car);
     }
+
+    /**
+     * Sends a list of car information to the client
+     */
     private void sendCarsToClient() {
         List<String> cars = CarsList.getInstance().getCars();
 
