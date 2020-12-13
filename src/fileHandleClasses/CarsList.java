@@ -30,7 +30,10 @@ public class CarsList {
         }
     }
 
-    public void addNewCarToFile(String car) {
+    /**
+     * Adds car to file and then to the cars ArrayList
+     */
+    public synchronized void addNewCarToFile(String car) {
         try {
             BufferedWriter writer = new BufferedWriter(
                     new FileWriter("database/cars.txt", true));
@@ -42,17 +45,14 @@ public class CarsList {
         }
     }
 
-    public void addCar(String car) {
+    private void addCar(String car) {
         cars.add(car);
     }
 
-    public void addCarsToFile() {
-
-    }
     /**
-     * @param reg Registration Number of the car to delete
+     * @param reg Registration Number of the car that has to be deleted
      */
-    public void deleteCar(String reg) {
+    public synchronized void deleteCar(String reg) {
         try {
             // Open the file without append mode
             BufferedWriter writer = new BufferedWriter(

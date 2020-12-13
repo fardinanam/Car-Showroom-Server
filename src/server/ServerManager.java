@@ -1,5 +1,6 @@
 package server;
 
+import car.Car;
 import fileHandleClasses.CarsList;
 import fileHandleClasses.UsersList;
 
@@ -79,25 +80,45 @@ public class ServerManager extends Thread{
             response = handleAddCar(clientRequest.substring(4));
         } else if(requestMessages[0].equals("DLT")) {
             response = handleDeleteCar(requestMessages[1]);
+        } else if(requestMessages[0].equals("BUY")) {
+            response = handleBuyCar(clientRequest.substring(4));
         }
         return response;
     }
 
-    private synchronized String handleDeleteCar(String requestMessage) {
-        CarsList.getInstance().deleteCar(requestMessage);
-        for(ServerManager client : clients) {
-            client.sendDeleteCarResponse(requestMessage);
+    private String handleBuyCar(String carInfo) {
+        Car car = new Car(carInfo);
+
+        int quantity = car.getQuantity();
+        if(quantity > 0) {
+            CarsList.getInstance().deleteCar(car.getReg());
+            car.setQuantity(car.getQuantity() - 1);
+            CarsList.getInstance().addNewCarToFile(car.toString());
+
+            for(ServerManager client : clients) {
+                client.sendDeleteCarResponse(car.getReg());
+                client.sendCarToClient(car.toString());
+            }
+            return "You have bought the car with reg " + car.getReg();
         }
-        return "Car with Reg No. " + requestMessage + " has been deleted";
+        return car.getReg() + " is out of stock";
     }
 
-    private synchronized String handleAddCar(String requestMessage) {
-        String reg = requestMessage.split(",")[0];
+    private String handleDeleteCar(String reg) {
+        CarsList.getInstance().deleteCar(reg);
+        for(ServerManager client : clients) {
+            client.sendDeleteCarResponse(reg);
+        }
+        return "Car with Reg No. " + reg + " has been deleted";
+    }
+
+    private String handleAddCar(String carInfo) {
+        String reg = carInfo.split(",")[0];
         if(!CarsList.getInstance().contains(reg)) {
-            CarsList.getInstance().addNewCarToFile(requestMessage);
+            CarsList.getInstance().addNewCarToFile(carInfo);
             // Sending new Car info to all clients
             for(ServerManager client : clients) {
-                client.sendCarToClient(requestMessage);
+                client.sendCarToClient(carInfo);
             }
             return "Your car has been added";
         } else {
